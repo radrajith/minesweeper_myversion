@@ -2,7 +2,6 @@ package minesweeper;
 
 
 import java.util.Random;
-
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -50,25 +49,25 @@ public class Built extends Application{
 				if(matrix[x][y]==-1){//do nothing
 				}
 				else{
-					for(int i =-1; i<2; i++){
-						for(int j = -1; j<2 ; j++){
-							if(x==17||x==0){
-								continue;
-							}
-							else if(y==15||x==0){
-								continue;
-							}
-							else{
-								if(matrix[x+i][y+j]==-1){
-									num++;
+						for(int i =-1; i<2; i++){
+							for(int j = -1; j<2 ; j++){
+								if(checkCorners(x+i,y+j)){
+									if(matrix[x+i][y+j]==-1){
+										num++;
+									}
 								}
 							}
 						}
 					matrix[x][y]= num;
-					}	
 				}
 			}
 		}
+	}
+	private boolean checkCorners(int x, int y) {
+		if((x<0)||(y<0)||(x>17)||(y>15))
+			return false;
+		else
+			return true;
 	}
 	private void createButtons() {
 		for(int i = 0; i<button.length; i++){
@@ -148,10 +147,7 @@ public class Built extends Application{
 		int y = pos%16;
 		return matrix[x][y];
 	}
-	
-	
-
-	
+		
 	public static void main(String[] args){
 		launch(args);
 	}
