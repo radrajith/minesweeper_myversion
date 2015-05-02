@@ -51,7 +51,7 @@ public class Built extends Application{
 				else{
 						for(int i =-1; i<2; i++){
 							for(int j = -1; j<2 ; j++){
-								if(checkCorners(x+i,y+j)){
+								if(checkCorners(x+i,y+j)){	//checking corners to avoid out of bound error.
 									if(matrix[x+i][y+j]==-1){
 										num++;
 									}
@@ -147,7 +147,6 @@ public class Built extends Application{
 		int y = pos%16;
 		return matrix[x][y];
 	}
-		
 	public static void main(String[] args){
 		launch(args);
 	}
