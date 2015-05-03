@@ -2,6 +2,7 @@ package minesweeper;
 
 
 import java.util.Random;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -15,11 +16,14 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.event.EventHandler;
 
+import java.util.Stack;
+
 public class Built extends Application{
 	final static int screenSize_x = 368;
 	final static int screenSize_y = 450;
 	private Button[] button = new Button[(screenSize_x/19*screenSize_y/30 )+3];
-	private int noOfMine = 20;
+	private int noOfMine = 25;
+	private Stack<Integer> stack = new Stack<>();
 	private int[][] matrix = new int[18][16];
 	Group root = new Group();
 	public void start(Stage stage){
@@ -49,19 +53,25 @@ public class Built extends Application{
 				if(matrix[x][y]==-1){//do nothing
 				}
 				else{
-						for(int i =-1; i<2; i++){
-							for(int j = -1; j<2 ; j++){
-								if(checkCorners(x+i,y+j)){	//checking corners to avoid out of bound error.
-									if(matrix[x+i][y+j]==-1){
-										num++;
-									}
-								}
-							}
-						}
+					num = checkSurrounding(x,y);
+						
 					matrix[x][y]= num;
 				}
 			}
 		}
+	}
+	private int checkSurrounding(int x, int y) {
+		int num = 0;
+		for(int i =-1; i<2; i++){
+			for(int j = -1; j<2 ; j++){
+				if(checkCorners(x+i,y+j)){	//checking corners to avoid out of bound error.
+					if(matrix[x+i][y+j]==-1){
+						num++;
+					}
+				}
+			}
+		}
+		return num;
 	}
 	private boolean checkCorners(int x, int y) {
 		if((x<0)||(y<0)||(x>17)||(y>15))
@@ -117,8 +127,54 @@ public class Built extends Application{
 		else{
 		button[pos].setBackground(null);
 		int num = getNumber(pos);
-		button[pos].setText(Integer.toString(num));
+			if(num>0&&num<10){
+				button[pos].setText(Integer.toString(num));
 			}
+			else if(num ==0){
+				checkForZeros(pos);
+			}
+			else if(num ==-1){
+				button[pos].setText(Integer.toString(num));
+			}
+		}
+	}
+	private void checkForZeros(int pos) {
+		int x = pos/16;
+		int y = pos%16;
+		check8Cell(x, y);
+		while(stack.size()!=0){
+			y = (int) stack.pop();
+			x = (int) stack.pop();
+			check8Cell(x,y);
+		}
+	}
+
+	private void check8Cell(int x, int y) {
+		for(int i =-1; i<2; i++){
+			for(int j = -1; j<2 ; j++){
+				if(checkCorners(x+i,y+j)){	//checking corners to avoid out of bound error.
+					if(matrix[x+i][y+j]==0){
+						disappearButton(x+i,y+j);
+						stack.push(new Integer(x+i));
+						stack.push(new Integer(y+j));
+					}
+					else{
+						int pos = ((x+i)*16)+(y+j);
+						if(getNumber(pos)!=10)
+						button[pos].setText(Integer.toString(getNumber(pos)));
+						button[pos].setBackground(null);
+					}
+				}
+			}
+		}	
+	}
+	private void disappearButton(int x, int y) {
+		int pos = ((x*16)+(y));
+		button[pos].setText("  ");
+		button[pos].setBackground(null);
+		matrix[x][y] = 10;
+		System.out.println("x="+(x));
+		System.out.println("y="+(y));
 	}
 	private void leftClick(int pos){
 		//have to redo this flag image on the button, Since its too small.
