@@ -1,6 +1,7 @@
 package minesweeper;
 
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javafx.application.Application;
@@ -8,6 +9,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.Group;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
@@ -21,10 +25,12 @@ import java.util.Stack;
 public class Built extends Application{
 	final static int screenSize_x = 368;
 	final static int screenSize_y = 450;
+	public int temp = 0;
 	private Button[] button = new Button[(screenSize_x/19*screenSize_y/30 )+3];
 	private int noOfMine = 25;
 	private Stack<Integer> stack = new Stack<>();
 	private int[][] matrix = new int[18][16];
+	private ArrayList<Integer> locationOfMines = new ArrayList<>();
 	Group root = new Group();
 	public void start(Stage stage){
 		generateMine(noOfMine);
@@ -41,6 +47,7 @@ public class Built extends Application{
   		Random rand = new Random();
   		for(int i = 0; i<=mine; i++){
   			int randpos = rand.nextInt(250);
+  			locationOfMines.add(randpos);
   			int x = randpos/16;
   			int y = randpos%16;
   			matrix[x][y] = -1;
@@ -134,7 +141,7 @@ public class Built extends Application{
 				checkForZeros(pos);
 			}
 			else if(num ==-1){
-				button[pos].setText(Integer.toString(num));
+				gameLost();
 			}
 		}
 	}
@@ -178,30 +185,64 @@ public class Built extends Application{
 	}
 	private void leftClick(int pos){
 		//have to redo this flag image on the button, Since its too small.
-		if(button[pos].getBackground()!=null){
-
-		if(button[pos].getGraphic()!=null){
-			button[pos].setGraphic(null);
-			button[pos].setText("  ");
+		if(temp<=locationOfMines.size()){
+			if(button[pos].getBackground()!=null){
+				
+				if(button[pos].getGraphic()!=null){
+					button[pos].setGraphic(null);
+					button[pos].setText("  ");
+				}
+				else{
+					Image flag = new Image(getClass().getResourceAsStream("flag.png"));
+					ImageView imgSize = new ImageView();
+					imgSize.setFitWidth(button[pos].getWidth()-16);
+					imgSize.setFitHeight(button[pos].getHeight()-8);
+					imgSize.setPreserveRatio(true);
+					imgSize.fitHeightProperty();
+					imgSize.fitWidthProperty();
+					imgSize.setImage(flag);
+					button[pos].setText("");
+					button[pos].setGraphic(imgSize);
+					System.out.println(button[pos].getGraphicTextGap());
+				}
 			}
-		else{
-			Image flag = new Image(getClass().getResourceAsStream("flag.png"));
-			ImageView imgSize = new ImageView();
-			imgSize.setFitWidth(button[pos].getWidth()-16);
-			imgSize.setFitHeight(button[pos].getHeight()-8);
-			imgSize.setPreserveRatio(true);
-			imgSize.fitHeightProperty();
-			imgSize.fitWidthProperty();
-			imgSize.setImage(flag);
-			button[pos].setText("");
-			button[pos].setGraphic(imgSize);
-			}
+			temp++;
+		}
+		if(temp>=locationOfMines.size()){
+			checkGameWon();
 		}
 	}
+	
 	private int getNumber(int pos){
 		int x = pos/16;
 		int y = pos%16;
 		return matrix[x][y];
+	}
+	private void gameLost() {
+		Text output = new Text(screenSize_x/2-100,screenSize_y/2,"GAME LOST");
+		output.setFont(Font.font("TimesNewRoman",40));
+		output.setFill(Color.RED);
+		root.getChildren().add(output);
+		for(int i=0;i<locationOfMines.size(); i++){
+		button[locationOfMines.get(i)].setText("x");
+		button[locationOfMines.get(i)].setBackground(null);
+		}
+	}
+	private void checkGameWon() {
+		for(int i=0;i<locationOfMines.size(); i++){
+			int pos = locationOfMines.get(i);
+			if(button[pos].getGraphicTextGap() == 4.0){
+				if(i==locationOfMines.size()-1){
+					gameWon();
+				}
+			}
+		}
+	}
+	private void gameWon(){
+		Text output = new Text(screenSize_x/2-80,screenSize_y/2,"You Won");
+		output.setFont(Font.font("TimesNewRoman",40));
+		output.setFill(Color.RED);
+		root.getChildren().add(output);
 	}
 	public static void main(String[] args){
 		launch(args);
